@@ -257,7 +257,7 @@ export class RoadRenderer {
     
     return {
         x: (width / 2) + (scale * p.x * (width / 2)),
-        y: (height / 2) - (scale * p.y * (height / 2)), 
+        y: (height * 0.4) - (scale * p.y * (height / 2)), 
         w: scale * roadWidth * (width / 2)
     };
   }

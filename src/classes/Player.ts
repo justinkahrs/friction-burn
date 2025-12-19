@@ -46,7 +46,7 @@ export class Player {
 
     // Centrifugal Force
     // Drifts player in opposite direction of curve
-    const centrifugal = (currentCurve * (this.speed / this.maxSpeed)) * 0.02; 
+    const centrifugal = (currentCurve * (this.speed / this.maxSpeed)) * 0.015; 
     this.x -= centrifugal;
 
     // Steering
@@ -58,7 +58,7 @@ export class Player {
     
     // Clamp X to bounds? Or let them go off road?
     // Let them go off road (-2 to 2)
-    this.x = Math.max(-2, Math.min(2, this.x));
+    this.x = Math.max(-4, Math.min(4, this.x));
     
     // Slow down if off road
     if ((this.x < -1 || this.x > 1) && this.speed > this.maxSpeed / 4) {
