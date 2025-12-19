@@ -1,0 +1,284 @@
+Game Requirements Document
+
+Project Name: (Working Title)
+Genre: Arcade racing combat
+Platform: Steam (desktop)
+Tech Stack: Phaser 3, Electron, TypeScript
+Art Style: Pixel art
+Camera: Pseudo-3D road with hills and curves
+Players: Single-player with AI bots
+Future: Couch co-op split screen
+
+⸻
+
+1. Core Vision
+
+Create a faithful pseudo-3D Road Rash-style racer featuring:
+	•	Winding roads and rolling hills rendered using a classic segment-based projection
+	•	High-speed arcade racing feel
+	•	Real-time combat (punching, kicking, weapons)
+	•	Pickups and powerups placed on the track
+	•	AI-controlled opponents
+	•	Full controller support
+	•	Steam-ready desktop build
+
+This is not true 3D. The illusion must be achieved using 2D rendering and sprite scaling.
+
+⸻
+
+2. Rendering and Camera System
+
+2.1 World Coordinate System
+
+All gameplay occurs in “road space”:
+	•	z: forward distance along the track
+	•	x: lateral offset from road center
+	•	y: vertical elevation for hills
+
+2.2 Track Representation
+
+The track is an ordered array of segments.
+
+Each segment must define:
+	•	z: starting distance of the segment
+	•	curve: lateral curve value (negative = left, positive = right)
+	•	y: vertical elevation at segment start
+	•	widthMultiplier: optional road width modifier
+	•	sprites: optional roadside props with { x, type }
+	•	pickups: optional pickups with { x, type }
+
+Segment length must be constant.
+
+2.3 Track Builder
+
+Implement reusable “track pieces” that stamp multiple segments:
+	•	Straight
+	•	Left curve
+	•	Right curve
+	•	S-curve
+	•	Hill up
+	•	Hill down
+	•	Combined curve + hill
+
+Track construction must support:
+	•	Deterministic assembly
+	•	JSON serialization and loading
+	•	Future random generation
+
+2.4 Road Projection and Rendering
+
+Implement a pseudo-3D projection:
+	•	Render from farthest visible segment to nearest
+	•	Use perspective scaling based on distance from camera
+	•	Apply cumulative curve offset per segment
+	•	Apply elevation to vertical projection
+
+Rendering method:
+	•	Draw road as trapezoids per segment using Phaser Graphics
+	•	Include road surface, edges, and optional lane markers
+
+Constraints:
+	•	Fixed low internal resolution
+	•	Nearest-neighbor scaling
+	•	Integer rounding of projected positions to prevent pixel shimmer
+
+2.5 Camera
+	•	Camera follows player z position
+	•	Camera x offsets slightly with steering
+	•	Subtle camera bob and tilt on curves and hills
+	•	Designed to support multiple cameras for future split screen
+
+⸻
+
+3. Player Vehicle System
+
+3.1 Movement Model
+
+Player state includes:
+	•	z, x
+	•	speed
+	•	maxSpeed
+	•	acceleration
+	•	braking
+	•	offroadDrag
+	•	state: riding, stunned, crashed
+
+Movement rules:
+	•	Forward speed modified by hills
+	•	Lateral movement influenced by steering and road curve
+	•	Off-road reduces speed and control
+	•	Exceeding road bounds can cause crashes
+
+3.2 Visual Representation
+	•	Player bike and rider rendered as sprites
+	•	Sprite scale based on distance
+	•	Lean animation based on steering and speed
+	•	Crash and recovery animations
+
+⸻
+
+4. AI Opponents
+
+4.1 Bot Movement
+
+Bots must:
+	•	Follow the road curve automatically
+	•	Maintain a preferred lane
+	•	Overtake when space allows
+	•	Rubber-band subtly to keep races competitive
+
+4.2 Bot Combat Behavior
+
+Bots must:
+	•	Detect nearby riders in front or beside
+	•	Decide when to punch or kick
+	•	Use weapons when available
+	•	Retaliate when attacked
+
+Bot logic should be deterministic and rule-based, not heavy AI.
+
+⸻
+
+5. Combat System
+
+5.1 Melee Combat
+	•	Punch and kick actions
+	•	Directional (left/right)
+	•	Active hit window
+	•	Range and lateral arc checks
+
+On hit:
+	•	Apply speed reduction
+	•	Apply lateral shove
+	•	Apply short stun duration
+	•	Trigger impact feedback (audio, shake)
+
+5.2 Weapons
+
+Weapons are pickups that modify attacks:
+	•	Extended reach
+	•	Increased stun
+	•	Projectile weapons
+
+Thrown weapons:
+	•	Exist in road space
+	•	Move forward with speed
+	•	Collide using simple distance checks
+
+⸻
+
+6. Pickups and Powerups
+
+6.1 Pickup Placement
+	•	Pickups placed on specific segments with lateral offsets
+	•	Pickups visible in world and scale with distance
+
+6.2 Pickup Types
+
+Initial set:
+	•	Speed boost
+	•	Temporary shield
+	•	Weapon pickup
+
+Rules:
+	•	Short durations
+	•	Clear visual and audio feedback
+	•	Stack rules defined per pickup
+
+⸻
+
+7. Collision System
+	•	No full physics engine
+	•	Simple collision checks in road space:
+	•	Rider vs rider
+	•	Rider vs pickup
+	•	Rider vs weapon
+	•	Collisions based on z proximity and x overlap thresholds
+
+⸻
+
+8. Input System
+
+8.1 Input Abstraction
+
+Define action-based inputs:
+	•	Accelerate
+	•	Brake
+	•	Steer left
+	•	Steer right
+	•	Punch left
+	•	Punch right
+	•	Use item
+
+8.2 Keyboard Support
+	•	Configurable key bindings
+	•	Default layout provided
+
+8.3 Gamepad Support
+	•	Use Phaser Gamepad plugin
+	•	Support common controllers (Xbox, PlayStation, Switch Pro)
+	•	Analog steering and triggers
+	•	Button-based combat actions
+
+8.4 Player Slot System
+	•	Input mapped to player slots
+	•	“Press any button to join” logic
+	•	Designed to support multiple players later
+
+⸻
+
+9. UI and HUD
+	•	Speed indicator
+	•	Position in race
+	•	Lap count
+	•	Current item/weapon
+	•	Health or stun state (if applicable)
+
+HUD must be:
+	•	Pixel art
+	•	Anchored per camera
+	•	Designed to render per-player for split screen
+
+⸻
+
+10. Audio and Feedback
+	•	Engine pitch scales with speed
+	•	Impact sounds for combat and crashes
+	•	Pickup and weapon audio cues
+	•	Screen shake and brief hit-stop on impacts
+
+⸻
+
+11. Split Screen Readiness (Future)
+
+Design constraints:
+	•	Renderer must accept camera parameters
+	•	World update loop must support multiple players
+	•	Rendering must support multiple viewports
+	•	HUD must be instanced per player
+
+No implementation required now, but architecture must support it.
+
+⸻
+
+12. Development Milestones
+	1.	Flat road renderer with perspective
+	2.	Curves and hills
+	3.	Player movement and speed feel
+	4.	One AI bot with collisions
+	5.	Multiple bots with pack behavior
+	6.	Melee combat
+	7.	Pickups and one weapon type
+	8.	Track builder and JSON export
+	9.	Controller support polish
+	10.	Steam-ready build polish
+
+⸻
+
+13. Non-Goals
+	•	No online multiplayer
+	•	No true 3D rendering
+	•	No heavy physics simulation
+	•	No procedural animation systems
+
+⸻

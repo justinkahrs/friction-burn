@@ -11,6 +11,11 @@ export type TJSONKey = ValueOf<typeof JSONKey>;
 
 export const ImageKey = {
   Title: "Title",
+  RiderVertical: "RiderVertical",
+  RiderLeftSlight: "RiderLeftSlight",
+  RiderLeftFull: "RiderLeftFull",
+  RiderRightSlight: "RiderRightSlight",
+  RiderRightFull: "RiderRightFull",
 };
 
 export const TextureKey = {

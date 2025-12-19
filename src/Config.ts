@@ -3,7 +3,7 @@ import { DefaultHeight, DefaultWidth } from "constants/gameConst";
 import OptionScene from "scene/OptionScene";
 import BaseScene from "scene/BaseScene";
 import LoadingScene from "scene/LoadingScene";
-import GameScene from "scene/GameScene";
+import { GameScene } from "scene/GameScene";
 
 export const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.WEBGL,
